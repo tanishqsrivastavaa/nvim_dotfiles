@@ -14,7 +14,15 @@ map("n", "<C-p>", ":find ", { desc = "Find file" })
 vim.api.nvim_create_autocmd("CmdlineChanged", {
     group = vim.api.nvim_create_augroup("user_cmdline_autocomplete", { clear = true }),
     pattern = { ":", "/", "?" },
-    callback = function() vim.fn.wildtrigger() end,
+    callback = function()
+        -- Shell-command completion (":!", ":r !", ":w !") scans every executable
+        -- on $PATH; on WSL that includes the mounted Windows dirs and hangs. Skip
+        -- autocompletion there -- press <Tab> manually if you ever want it.
+        if vim.fn.getcompletiontype(vim.fn.getcmdline()):find("shell") then
+            return
+        end
+        vim.fn.wildtrigger()
+    end,
 })
 -- Keep <Up>/<Down> as history navigation while the popup is open.
 map("c", "<Up>", function() return vim.fn.wildmenumode() == 1 and "<C-e><Up>" or "<Up>" end, { expr = true })
