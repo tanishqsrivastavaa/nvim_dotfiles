@@ -1,25 +1,21 @@
 ---@brief
 ---
---- https://github.com/microsoft/pyright
+--- https://github.com/DetachHead/basedpyright
 ---
---- `pyright`, a static type checker and language server for python
+--- `basedpyright`, a community fork of pyright with added type-checking and LSP
+--- features (inlay hints, semantic highlighting) that pyright's open-source
+--- build keeps locked inside the closed-source Pylance.
 ---
---- Pyright marks unreachable, unreferenced and deprecated code with hint
---- diagnostics. Nvim correctly reports them as regular diagnostics, but they
---- are usually too noisy (https://github.com/neovim/neovim/issues/30444), so
---- they are disabled by default. To re-enable:
----
---- ```lua
---- vim.lsp.config('pyright', {
----   settings = { pyright = { disableTaggedHints = false } },
---- })
---- ```
+--- Diagnostics are stricter than pyright out of the box (typeCheckingMode
+--- "standard"). Bump to "strict" via settings.basedpyright.analysis if wanted.
+--- Tagged hints (unreachable / unused / deprecated) are disabled below because
+--- they are usually too noisy (https://github.com/neovim/neovim/issues/30444).
 
 local function set_python_path(command)
   local path = command.args
   local clients = vim.lsp.get_clients {
     bufnr = vim.api.nvim_get_current_buf(),
-    name = 'pyright',
+    name = 'basedpyright',
   }
   for _, client in ipairs(clients) do
     if client.settings then
@@ -34,7 +30,7 @@ end
 
 ---@type vim.lsp.Config
 return {
-  cmd = { 'pyright-langserver', '--stdio' },
+  cmd = { 'basedpyright-langserver', '--stdio' },
   filetypes = { 'python' },
   root_markers = {
     'pyrightconfig.json',
@@ -45,12 +41,9 @@ return {
     'Pipfile',
     '.git',
   },
-  ---@type lspconfig.settings.pyright
   settings = {
-    pyright = {
+    basedpyright = {
       disableTaggedHints = true,
-    },
-    python = {
       analysis = {
         autoSearchPaths = true,
         useLibraryCodeForTypes = true,
@@ -61,20 +54,20 @@ return {
   on_attach = function(client, bufnr)
     vim.api.nvim_buf_create_user_command(bufnr, 'LspPyrightOrganizeImports', function()
       local params = {
-        command = 'pyright.organizeimports',
+        command = 'basedpyright.organizeimports',
         arguments = { vim.uri_from_bufnr(bufnr) },
       }
 
-      -- Using client.request() directly because "pyright.organizeimports" is private
-      -- (not advertised via capabilities), which client:exec_cmd() refuses to call.
-      -- https://github.com/neovim/neovim/blob/c333d64663d3b6e0dd9aa440e433d346af4a3d81/runtime/lua/vim/lsp/client.lua#L1024-L1030
+      -- Using client.request() directly because "basedpyright.organizeimports" is
+      -- private (not advertised via capabilities), which client:exec_cmd() refuses
+      -- to call.
       ---@diagnostic disable-next-line: param-type-mismatch
       client.request('workspace/executeCommand', params, nil, bufnr)
     end, {
       desc = 'Organize Imports',
     })
     vim.api.nvim_buf_create_user_command(bufnr, 'LspPyrightSetPythonPath', set_python_path, {
-      desc = 'Reconfigure pyright with the provided python path',
+      desc = 'Reconfigure basedpyright with the provided python path',
       nargs = 1,
       complete = 'file',
     })
