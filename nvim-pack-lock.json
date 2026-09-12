@@ -1,0 +1,16 @@
+{
+  "plugins": {
+    "fff": {
+      "rev": "d84c0a10cd5ea23285cb5575fa90179f51710f99",
+      "src": "https://github.com/dmtrKovalenko/fff"
+    },
+    "flash.nvim": {
+      "rev": "5f0f270fdc7c5b0c21d903ee85b9cb06f2ac636a",
+      "src": "https://github.com/folke/flash.nvim"
+    },
+    "gruvbox.nvim": {
+      "rev": "154eb5ff5b96d0641307113fa385eaf0d36d9796",
+      "src": "https://github.com/ellisonleao/gruvbox.nvim"
+    }
+  }
+}
